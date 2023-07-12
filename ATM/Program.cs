@@ -77,72 +77,74 @@ public class CardHolder
             MySqlConnection con = new MySqlConnection();
             con.ConnectionString = connectionString;
             con.Open();
-            string sql = "select * from CardHolders";
+
+
+            void printOptions()
+            {
+                Console.WriteLine("Please choose from...");
+                Console.WriteLine("1. Diposit");
+                Console.WriteLine("2. Withdraw");
+                Console.WriteLine("3. Show Balance");
+                Console.WriteLine("4. Exit");
+            }
+
+            void deposit(CardHolder currentUser)
+            {
+                try
+                {
+                    Console.WriteLine("How much would you like to deposit?");
+                    // Convert string to double
+                    double deposit = Double.Parse(Console.ReadLine());
+                    currentUser.setBalance(currentUser.getBalance() + deposit);
+                    Console.WriteLine("Thank you for your deposit. Your current balance is: " + currentUser.getBalance());
+                }
+                catch (Exception err)
+                {
+                    Console.WriteLine(err.Message);
+                }
+
+            }
+
+            void withDraw(CardHolder currentUser)
+            {
+                try
+                {
+                    Console.WriteLine("How much would you like to withdraw?");
+                    // Convert string to double
+                    double withDraw = Double.Parse(Console.ReadLine());
+                    // Check if user has enough money
+                    if (currentUser.getBalance() < withDraw)
+                    {
+                        throw new Exception("Insuffcient balance :( !");
+                    }
+                    else
+                    {
+                        double newBalance = currentUser.getBalance() - withDraw;
+                        currentUser.setBalance(newBalance);
+                        Console.WriteLine("Thank you for your withdraw. Your current balance is: " + currentUser.getBalance());
+                    }
+                }
+                catch (Exception err)
+                {
+                    Console.WriteLine(err.Message);
+                }
+
+            }
+
+            void balance(CardHolder currentUser)
+            {
+
+                Console.WriteLine("Your current balance is: " + currentUser.getBalance());
+
+            }
+            string sql = "select * from CardHolders;";
             MySqlCommand command = new MySqlCommand(sql, con);
             MySqlDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
-
-                void printOptions()
-                {
-                    Console.WriteLine("Please choose from...");
-                    Console.WriteLine("1. Diposit");
-                    Console.WriteLine("2. Withdraw");
-                    Console.WriteLine("3. Show Balance");
-                    Console.WriteLine("4. Exit");
-                }
-
-                void deposit(CardHolder currentUser)
-                {
-                    try
-                    {
-                        Console.WriteLine("How much would you like to deposit?");
-                        // Convert string to double
-                        double deposit = Double.Parse(Console.ReadLine());
-                        currentUser.setBalance(currentUser.getBalance() + deposit);
-                        Console.WriteLine("Thank you for your deposit. Your current balance is: " + currentUser.getBalance());
-                    }
-                    catch (Exception err)
-                    {
-                        Console.WriteLine(err.Message);
-                    }
-
-                }
-
-                void withDraw(CardHolder currentUser)
-                {
-                    try
-                    {
-                        Console.WriteLine("How much would you like to withdraw?");
-                        // Convert string to double
-                        double withDraw = Double.Parse(Console.ReadLine());
-                        // Check if user has enough money
-                        if (currentUser.getBalance() < withDraw)
-                        {
-                            throw new Exception("Insuffcient balance :( !");
-                        }
-                        else
-                        {
-                            double newBalance = currentUser.getBalance() - withDraw;
-                            currentUser.setBalance(newBalance);
-                            Console.WriteLine("Thank you for your withdraw. Your current balance is: " + currentUser.getBalance());
-                        }
-                    }
-                    catch (Exception err)
-                    {
-                        Console.WriteLine(err.Message);
-                    }
-
-                }
-
-                void balance(CardHolder currentUser)
-                {
-                    Console.WriteLine("Your current balance is: " + currentUser.getBalance());
-                }
-
                 List<CardHolder> cardHolders = new List<CardHolder>();
-                cardHolders.Add(new CardHolder("12213131231", 1234, "John", "Cena", 400));
                 cardHolders.Add(new CardHolder("76715263190", 5678, "Randy", "Orton", 350));
+                cardHolders.Add(new CardHolder(reader["CardNum"].ToString(), int.Parse(reader["Pin"].ToString()), reader["FirstName"].ToString(), reader["LastName"].ToString(), double.Parse(reader["Balance"].ToString())));
 
                 Console.WriteLine("Welcome to simple ATM.");
                 Console.WriteLine("Please insert your debit card");
@@ -156,7 +158,9 @@ public class CardHolder
                         debitCardNumber = Console.ReadLine();
                         // check num from the List
                         // store the current user detail
+
                         currentUser = cardHolders.FirstOrDefault(a => a.CardNum == debitCardNumber);
+
                         if (currentUser != null)
                         {
                             break;
@@ -213,7 +217,7 @@ public class CardHolder
                     else { option = 0; }
                 } while (option != 4);
                 Console.WriteLine("Thank you, have a great day :) !");
-                con.Close();
+
             }
         }
         catch (MySqlException ex)
